@@ -1,7 +1,24 @@
 -- Functions to pseudorandomize order of elements in sequences of various length. --
 
 by Elena Benini, elena.benini@psych.rwth-aachen.de
-February 2020
+March-April 2020
+
+---- Improvements of version 10 ----
+
+1. balanceTransitionsMinus1_str allows to directly insert your task names as
+    strings instead of 0 and 1
+2. maxCounter is removed from inputs: a safe counter is picked  and placed within
+    the function
+3. orderStimWithinTasks_str allows again to have task names as strings in the
+    output dataframe
+4. df_BooleanOrder gives a more "random-looking" dataframe
+5. noStimRepetition allows to build a sequence of integers where 2 equal int
+    are never found in subsequent positions
+5. noStimRepetition is improved to return a sequence w/o n-1 repetition starting 
+    from a user-input sequence: this doens't force each element to appear same 
+    number of times
+
+----------------------------------
 
 Since the very first steps into programming of psychological experiments, I run into the issue of
 generating sequences of stimuli and/or experimental tasks that complied with certain demands while

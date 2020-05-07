@@ -1,18 +1,7 @@
 """Functions to pseudorandomize order of elements in sequences of various length.
 
 by Elena Benini, elena.benini@psych.rwth-aachen.de
-February 2020
-
----- Improvements of version 10 ----
-1. balanceTransitionsMinus1_str allows to directly insert your task names as
-    strings instead of 0 and 1
-2. maxCounter is removed from inputs: a safe counter is picked  and placed within
-    the function
-3. orderStimWithinTasks_str allows again to have task names as strings in the
-    output dataframe
-4. df_BooleanOrder gives a more "random-looking" dataframe
-5. noStimRepetition allows to build a sequence of integers where 2 equal int
-    are never found in subsequent positions
+March-April 2020
 
 Most of these functions generate pseudorandom sequence of elements according to
 certain constraints. These constraints mostly concern relative positions of the
@@ -717,7 +706,7 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
         vector with elements repeated trials/len(stimElmns) times or with stimLst
         elements
     """
-    
+
     if (trials)%len(stimElmns) != 0:
             raise ValueError("stimElmns list length must be a divisor of trials, otherwise balancing is not possible by construction. Also, trials must even integer")
     maxCounter = 10
