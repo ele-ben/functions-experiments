@@ -801,18 +801,22 @@ def shuffle_rows(res, df2shuf, targetCol):
     DataFrame
         identical to df2shuf, but in different order.
     """
-
+    # shuffle the dataframe rows to make the final df look more random
+    df2shuf = df2shuf.sample(frac=1).reset_index(drop=True)
+    # create an empty dataframe that will be output
     df_output = pd.DataFrame(columns = df2shuf.columns)
+    # loop over the df2shuf rows to check for a match with ith elemnt of res
     for i in range(len(res)):
-        choices = df2shuf[df2shuf[targetCol]== res[i]].index
-        ch = random.choice(choices)
-        row = df2shuf.iloc[ch]
-        df_output = df_output.append(row, ignore_index = True)
-        df2shuf = df2shuf.drop([ch], axis =0)
-        df2shuf.reset_index(inplace = True, drop= True)
+        # pick the firt match, thanks to the intial shuffle this still gives
+        # a ranomd-enough final df
+        ch = df2shuf[df2shuf[targetCol]== res[i]].index[0]
+        row = df2shuf.iloc[ch] # create a new row as the matching row
+        df_output = df_output.append(row, ignore_index = True) # append the new row
+        df2shuf = df2shuf.drop([ch], axis =0) # drop the macthing row from the df2shuf
+        df2shuf.reset_index(inplace = True, drop= True) # reset index
     return df_output
 
-def DfBooleanOrder(df2order, targetCol, stimSeq, taskCol, taskSeq):
+def DfBooleanOrder(df2shuf, targetCol, stimSeq, taskCol, taskSeq):
     """merge 2 columns back in the dataframe
 
     Take the pseudorandomized stimuli AND task sequence and re-order the rows of
@@ -821,7 +825,7 @@ def DfBooleanOrder(df2order, targetCol, stimSeq, taskCol, taskSeq):
 
     Parameters
     ----------
-    df2order: the df to re-order
+    df2shuf: the df to re-order
     targetCol: a string indicating the name of the column having same values
         as the stimSeq array
     stimSeq: the one-column array resulting from the pseudorandomization that
@@ -836,57 +840,55 @@ def DfBooleanOrder(df2order, targetCol, stimSeq, taskCol, taskSeq):
     DataFrame
         identical to df2shuf, but in different order.
     """
-
-    df_output = pd.DataFrame(columns = df2order.columns)
+    # shuffle the dataframe rows to make the final df look more random
+    df2shuf = df2shuf.sample(frac=1).reset_index(drop=True)
+    # create an empty dataframe that will be output
+    df_output = pd.DataFrame(columns = df2shuf.columns)
     for i in range(len(stimSeq)):
-        boolean_condition = (df2order[taskCol] == taskSeq[i]) & (df2order[targetCol] == stimSeq[i])
-        choices = df2order.loc[boolean_condition].index
-        #print choices
-        ch = random.choice(choices)
-        row = df2order.iloc[ch]
-        #print row
+        boolean_condition = (df2shuf[taskCol] == taskSeq[i]) & (df2shuf[targetCol] == stimSeq[i])
+        ch = df2shuf.loc[boolean_condition].index[0]
+        row = df2shuf.iloc[ch]
         df_output = df_output.append(row, ignore_index = True)
-        df2order = df2order.drop([ch], axis =0)
-        df2order.reset_index(inplace = True, drop= True)
+        df2shuf = df2shuf.drop([ch], axis =0)
+        df2shuf.reset_index(inplace = True, drop= True)
     return df_output
 
 # SOLVE!
 # Test for DfBooleanOrder and shuffle_rows
 # create toy variables for the test:
-# task = ["magnit", "parity "]
-# stim = list(range(1,5)) + list(range(6,10))
-# colour = ["red", "blue"] # other features of the trial...
-# shape = ["full"]
-# feat_comb = pd.DataFrame([(x,y,z) for x in task for y in stim for z in colour], columns=['task', 'stim', 'colour'])
-# feat_comb["condID"] = range(len(feat_comb))
-# # build a df repeating the combinations a certain number of time, e.g. 3
-# trialsPercondition= 2
-# trialSeq =  pd.concat([feat_comb]*trialsPercondition, ignore_index=True) #repeat the df with the possible conditions for the number of times we want each repetition
-# trialSeq["trID"] = np.arange(len(trialSeq))
+task = ["magnit", "parity "]
+stim = list(range(1,5)) + list(range(6,10))
+colour = ["red", "blue"] # other features of the trial...
+shape = ["full"]
+feat_comb = pd.DataFrame([(x,y,z) for x in task for y in stim for z in colour], columns=['task', 'stim', 'colour'])
+feat_comb["condID"] = range(len(feat_comb))
+# build a df repeating the combinations a certain number of time, e.g. 3
+trialsPercondition= 2
+trialSeq =  pd.concat([feat_comb]*trialsPercondition, ignore_index=True) #repeat the df with the possible conditions for the number of times we want each repetition
+trialSeq["trID"] = np.arange(len(trialSeq))
 # #trialSeq.to_csv(myDir+"trialSeq")
 # # re order the df using DfBooleanOrder (or shuffle_rows) and then sort the re-ordered as it was before (sorted by trID) and
 # # check if it is identical to the starting one
-# df2order = trialSeq
-# stimElmns = list(set(trialSeq.stim))
-# timesXtask = int(len(taskSeq)/len(stimElmns)/2)
-# minusWhat = 1
-# trials = 48
-# stimAndTaskArray = orderStimWithinTasks_str(trials, stimElmns, minusWhat, task[0], task[1])
-# taskSeq = stimAndTaskArray["task"]
-# stimSeq = stimAndTaskArray["stim"]
-# targetCol = "stim"
-# taskCol = "task"
-# post_bool = DfBooleanOrder(df2order, targetCol, stimSeq, taskCol, taskSeq)
-# post_shuffle = shuffle_rows(taskSeq, df2order, taskCol)
-# # or..
-# #post_shuffle = shuffle_rows(stimSeq, df2order, targetCol)
-# post_bool.sort_values(by = ['trID'], inplace=True)
-# post_shuffle.sort_values(by = ['trID'], inplace=True)
-# print df2order.reset_index(drop=True)
-# print post_bool.reset_index(drop=True)
-# # are the df identical?
-# print("is post_bool identical to df2order? " + str(all(post_bool == trialSeq)))
-# print("is post_shuffle identical to df2order? "+ str(all(post_shuffle.reset_index(drop=True) == trialSeq.reset_index(drop=True))))
+df2shuf = trialSeq
+stimElmns = list(set(trialSeq.stim))
+#timesXtask = int(len(taskSeq)/len(stimElmns)/2)
+minusWhat = 1
+trials = len(trialSeq)
+stimAndTaskArray = orderStimWithinTasks_str(trials, stimElmns, minusWhat, task[0], task[1])
+taskSeq = stimAndTaskArray["task"]
+stimSeq = stimAndTaskArray["stim"]
+targetCol = "stim"
+taskCol = "task"
+post_bool = DfBooleanOrder(df2shuf, targetCol, stimSeq, taskCol, taskSeq)
+# or
+post_shuffle = shuffle_rows(taskSeq, df2shuf, taskCol)
+# or..
+post_shuffle = shuffle_rows(stimSeq, df2shuf, targetCol)
+post_bool.sort_values(by = ['trID'], inplace=True)
+post_shuffle.sort_values(by = ['trID'], inplace=True)
+# are the df identical?
+print("is post_bool identical to df2shuf? " + str(all(post_bool.reset_index(drop=True) == df2shuf.reset_index(drop=True))))
+print("is post_shuffle identical to df2shuf? "+ str(all(post_shuffle.reset_index(drop=True) == df2shuf.reset_index(drop=True))))
 
 def balanceNMinus2_ABC(trials, A, B, C):
     """balance n-2 repetitions and switch and avoid n-1 repetitions

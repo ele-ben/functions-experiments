@@ -212,9 +212,9 @@ according to the column given as input (targetCol)
 It takes as input a vector (res), identical to the target column, but ordered in the wished way. For example,
 it could take either one of the columns of the output of orderStimWithinTasks.
 it returns a dataframe identical to df2shuf, where the rows are ordered according to res
-For each element of res, it takes all of df2shuf rows having that value in targetCol
-selects a random one among these and appends it in the new, re-ordered, dataframe (df_output)
-Performance: it takes 5 minutes to run it 500 times. This cannot fail by construction
+It first shuffles the df2shuf rows. Then, for each element of res, it takes all of df2shuf rows having that value in targetCol
+selects the first one among these and appends it in the new, re-ordered, dataframe (df_output). The initial shuffle allows to pick the first of the matching row and still having a random looking final df. 
+Performance: it takes 4 seconds to run 10 times. This cannot fail by construction
 
 
 -- DfBooleanOrder FUNCTION
@@ -226,7 +226,7 @@ the STRING name of the columnn containing the elements (taskCol) to be compared 
 (obtained, for example by balanceTransitionsMinus1)
 It returns a dataframe identical to df2order, except for rows order which is chosen according to
 stimSeq and taskSeq vectors
-Performance:
+Performance: it takes 4 seconds to run 10 times. This cannot fail by construction
 Description:
 Similar to shuffle_rows, but it simultaneously takes into account the stimuli sequence(the sequence of elements
-without N-1 repetitions) and the task sequence (the sequence of 0 and 1 without N-1 repetitions)
+without N-1 repetitions) and the task sequence (the sequence of 0 and 1 without N-1 repetitions).
