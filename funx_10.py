@@ -784,6 +784,24 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
 # equalTimes = all(x == vec1[0] for x in vec1) # are number of times all the same?
 
 def shuffle_rows(res, df2shuf, targetCol):
+    """merge back a column in the dataframe
+
+    Take the pseudorandomized stimuli or task sequence and re-order the rows of
+    the df such that the features in the other columns are matched to the
+    psdrandomized column as they were in the initial df.
+
+    Parameters
+    ----------
+    res: the one-column array resulting from the pseudorandomization
+    df2shuf: the df to re-order
+    targetCol: a string indicating the name of the column to merge back
+
+    Returns
+    -------
+    DataFrame
+        identical to df2shuf, but in different order.
+    """
+
     df_output = pd.DataFrame(columns = df2shuf.columns)
     for i in range(len(res)):
         choices = df2shuf[df2shuf[targetCol]== res[i]].index
@@ -795,6 +813,30 @@ def shuffle_rows(res, df2shuf, targetCol):
     return df_output
 
 def DfBooleanOrder(df2order, targetCol, stimSeq, taskCol, taskSeq):
+    """merge 2 columns back in the dataframe
+
+    Take the pseudorandomized stimuli AND task sequence and re-order the rows of
+    the df such that the features in the other columns are matched to the
+    psdrandomized columnS as they were in the initial df.
+
+    Parameters
+    ----------
+    df2order: the df to re-order
+    targetCol: a string indicating the name of the column having same values
+        as the stimSeq array
+    stimSeq: the one-column array resulting from the pseudorandomization that
+        matches the values in targetCol
+    taskCol: a string indicaticating the name of the column having same values
+        as the taskSeq array
+    taskSeq: the one-column array resulting from the pseudorandomization that
+        matches the values in taskCol
+
+    Returns
+    -------
+    DataFrame
+        identical to df2shuf, but in different order.
+    """
+
     df_output = pd.DataFrame(columns = df2order.columns)
     for i in range(len(stimSeq)):
         boolean_condition = (df2order[taskCol] == taskSeq[i]) & (df2order[targetCol] == stimSeq[i])
