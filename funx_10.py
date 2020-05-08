@@ -890,6 +890,11 @@ post_shuffle.sort_values(by = ['trID'], inplace=True)
 print("is post_bool identical to df2shuf? " + str(all(post_bool.reset_index(drop=True) == df2shuf.reset_index(drop=True))))
 print("is post_shuffle identical to df2shuf? "+ str(all(post_shuffle.reset_index(drop=True) == df2shuf.reset_index(drop=True))))
 
+# Speed tests
+%timeit -r 10 shuffle_rows(stimSeq, df2shuf, targetCol)
+%timeit -r 10 DfBooleanOrder(df2shuf, targetCol, stimSeq, taskCol, taskSeq)
+
+
 def balanceNMinus2_ABC(trials, A, B, C):
     """balance n-2 repetitions and switch and avoid n-1 repetitions
 
