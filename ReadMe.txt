@@ -3,6 +3,13 @@
 by Elena Benini, elena.benini@psych.rwth-aachen.de
 March-April 2020
 
+Please download funx_10.py file and make sure to make it callable with
+
+import sys
+sys.path.append(r'C:\Users\your_path')
+
+or puting it in the same folder of the files calling it.
+
 ---- Improvements of version 10 ----
 
 1. balanceTransitionsMinus1_str allows to directly insert your task names as
