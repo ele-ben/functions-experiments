@@ -1,4 +1,4 @@
-## Python functions to pseudorandomize order of elements in sequences of various length
+## Python functions to pseudo-randomize order of elements in sequences of various length
 
 by Elena Benini, elena.benini@psych.rwth-aachen.de
 
@@ -10,21 +10,19 @@ Download funx_10.py file and make sure to make it callable with
     $ import sys
     $ sys.path.append(r'C:\Users\your_path')
 
-Then import the single functions using:
+Then import the functions using:
 
     $ from funx_10 import function_name
     $ # or to load all functions
     $ from funx_10 import *
 
-To get the help a a function type
+To get the help of a function type
 
     $ help(function_name)
 
 ### Improvements of version 10
-- [balanceNMinus2_str](#balanceNMinus2_str) includes 3 tasks and balance n-2 repetions and switch while
-  avoiding n-1 repetitions
-- [balanceTransitionsMinus1_str](#balanceTransitionsMinus1_str) allows to directly insert your task names as
-     strings instead of 0 and 1
+- [balanceNMinus2_str](#balanceNMinus2_str) includes 3 tasks and balance n-2 repetions and switch while avoiding n-1 repetitions
+- [balanceTransitionsMinus1_str](#balanceTransitionsMinus1_str) allows to directly insert your task names as strings instead of 0 and 1
 - maxCounter is removed from inputs: a safe counter is picked  and placed within
     the function
 - [orderStimWithinTasks_str](#orderStimWithinTasks_str) allows again to have task names as strings in the
@@ -59,7 +57,7 @@ to counterbalance the set of stimuli across the tasks.
 Since I couldn't find any ready-made solution across the different existing libraries, I decided to write some
 functions that allow to generate sequences of stimuli and tasks of whichever length that I could have used to
 realize my experiments.
-These functions generate pseudorandom sequence of elements according to certain constraints. These constraints
+These functions generate pseudo-random sequence of elements according to certain constraints. These constraints
 mostly concern relative positions of the elements (repetition, switch in subsequent positions).
 
 ### Overview of the functions
@@ -73,13 +71,11 @@ The [noStimRepetition](#noStimRepetition) exploits the algorithm used by to gene
 The following functions ([shuffle_rows](#shuffle_rows), [df_BooleanOrder](#df_BooleanOrder)) allow to integrate the sequences generated with the functions above into dataframes that are thought to fully describe
 a block of experimental trials. The approach would be to first
 generate a dataframe where rows are all of the trials of a generic block, while columns describe the features of each trial (task, stimulus, colour, position, cue-stimulus interval, etc). Then use one of the first 6 functions
-to "pseudo shuffle" (a) certain column(s). These functions can conveniently call some feature of the dataframe as inputs (for example, number of rows of the df for the first function). Finally, merge the pseudorandomized
+to "pseudo shuffle" (a) certain column(s). These functions can conveniently call some feature of the dataframe as inputs (for example, number of rows of the df for the first function). Finally, merge the pseudo-randomized
 columns into the original dataframe. If one doesn't like the dataframe approach to block building, she will want to simply exploit the first 6 functions inputing the desired parameters and refrain from using the block-shuffling functions.
-The last function, [balanceTransitionsMinus2](#balanceTransitionsMinus2), generates a sequence as its "minus1" version, but in which n-2 swithc and repetitions are balanced. This is deprecated since it's very uncommon to seek balance in n-2 transitions while having 2 tasks only: from the definition of n-2 repetition (a sequence like ABA) and swithes (CBA), it follows 3 tasks are needed.
+The last function, [balanceTransitionsMinus2](#balanceTransitionsMinus2), generates a sequence as its "minus1" version, but in which n-2 switch and repetitions are balanced. This is deprecated since it's very uncommon to seek balance in n-2 transitions while having 2 tasks only: from the definition of n-2 repetition (a sequence like ABA) and switches (CBA), it follows 3 tasks are needed.
 
-The algorithms of the first 6 functions are not deterministic and their functioning depends on the "quality" of the random sequence from which they start. Indeed, in some cases (< 0.0001% for the first and the 3rd functions, 5%
-for the 4th and the 5th), they need to re-start from a new random sequence. The functions implementing such algorithms are then written such that different
-attempts are allowed and, this way, they successfully generate the desired output in over 50000 tests.The probability of a re-start and the successful stats reported heavily depend on:
+The algorithms of the first 6 functions are not deterministic and their functioning depends on the "quality" of the random sequence from which they start. Indeed, in some cases (< 0.0001% for the first the 3rd and the 6th function, 4% for the 4th and the 5th function), they need to re-start from a new random sequence. The functions implementing such algorithms are then written such that different attempts are allowed and, this way, they successfully generate the desired output in over 50000 tests. The probability of a re-start and the successful stats reported heavily depend on:
 - number of attempts allowed to the functions (the counter: the higher, the lower the failure rate:
 allowing counter = 4 already reduces failure of the 1st function to 0 in 100k tests, with different toy lengths),
 - sequences length (the shorter, the higher the probability of a re-start),
@@ -87,9 +83,8 @@ allowing counter = 4 already reduces failure of the 1st function to 0 in 100k te
 The success rate is provided for each function, together with an estimation of their running-time.
 To implement these functions in one's scripts, given the odds of failure (close to 0) and the average performance of the functions (rather fast), a very sound solution could be to allow an unnecessary high
 number of attempts, for example 10.
-The functions were enriched by error messages to guide the user through the implementation: these are not supposed to rise when the functions work correctly. When errors appear concerning the inputs given to the function, one should follow the suggestions and adjust the input accordingly. When the errors warn that the
-output could not be correctly generated, given this event is very rare, one should verify whether she's using the function in a different way with respect to its original purpose.
-I am available for any suggestion/question/curiosity you may have, please email me at any time.
+The functions were enriched by error messages to guide the user through the implementation: these are not supposed to rise when the functions work correctly. When errors appear concerning the inputs given to the function, one should follow the suggestions and adjust the input accordingly. When the errors warn that the output could not be correctly generated, given this event is very rare, one should verify whether she's using the function in a different way with respect to its original purpose.
+Email me for any suggestion/question/curiosity you may have.
 
 
 #### [balanceTransitionsMinus1](#balanceTransitionsMinus1)
@@ -102,15 +97,15 @@ Both inputs must be integers and trials MUST be an EVEN number (very common in p
 Since we start with an even number of positions, transitions between positions will necessary be odd, so that it will not be possible to have n-1 repetitions = n-1 switches, thus we aim to make this delta equal to 1, so that the output will have either a N-1 rep more, or a N-1 switch more.
 The aim was to rely on an algorithm that doesn't blindly generate random sequences, but rather generates a
 single sequence and then adjusts it.
-It start with a sequence of 0 and 1, where number of 0 = number of 1 and shuffles it. This leads to a sequence of 0s and 1s randomly ordered.Then, the algorithm counts N-1 repetitions and switches and decide whether the imbalance is greater than 1. If so, then it will either reduces switches or repetitions accordingly. The rationale is to change positions of some 0s and 1s to quasi-balance the number of repetitions and switches. Since exchanging elements implies changes in 4 transitions (the one before and the one after each of the 2 swapped element), the algorithm reasons in terms of triplets where the to-be-excahnged elements stand in the middle of such triplets. This allows to control what happens when an element is changed, given the kind of triplet it belongs to. Thus, the algorithm searches the random sequence for some specific pairs of triplets and it swaps its middle elements. The algorithm looks for a certain triplet and the second triplet of the pair is defined according to the features of the first. According to whether there's an excess or repetitions or switches, the first of the wanted-triplets belongs to a certain set of all the possible triplets. Given the direction of the imbalance and the just-found first triplet, the second of the wanted-triplets belongs to a certain set of all the possible triplets. For example, in a sequence where number of repetitions is greater than switches, the sequence will be searched for triples belonging to the set {111. 000}. If 111 is found, the second triplet must belong to {100, 001}. If 100 is found, the middle elements are swapped and 111 becomes 101 and 100 becomes 110. Placing a 0 within 111 leads to repetitions reduced by 2 and switches increased by 2 (since this a 0-sum situation, thus for each repetition less, there's also a switch more). In the second triplet instead, nothing changes in terms of number of switches and repetition. If the firs triplet found is 000 then the second triplet must belong to {110, 011}. The output will be 010 and, e.g., 100.
+It start with a sequence of 0 and 1, where number of 0 = number of 1 and shuffles it. This leads to a sequence of 0s and 1s randomly ordered.Then, the algorithm counts N-1 repetitions and switches and decide whether the imbalance is greater than 1. If so, then it will either reduces switches or repetitions accordingly. The rationale is to change positions of some 0s and 1s to quasi-balance the number of repetitions and switches. Since exchanging elements implies changes in 4 transitions (the one before and the one after each of the 2 swapped element), the algorithm reasons in terms of triplets where the to-be-exchanged elements stand in the middle of such triplets. This allows to control what happens when an element is changed, given the kind of triplet it belongs to. Thus, the algorithm searches the random sequence for some specific pairs of triplets and it swaps its middle elements. The algorithm looks for a certain triplet and the second triplet of the pair is defined according to the features of the first. According to whether there's an excess or repetitions or switches, the first of the wanted-triplets belongs to a certain set of all the possible triplets. Given the direction of the imbalance and the just-found first triplet, the second of the wanted-triplets belongs to a certain set of all the possible triplets. For example, in a sequence where number of repetitions is greater than switches, the sequence will be searched for triples belonging to the set {111. 000}. If 111 is found, the second triplet must belong to {100, 001}. If 100 is found, the middle elements are swapped and 111 becomes 101 and 100 becomes 110. Placing a 0 within 111 leads to repetitions reduced by 2 and switches increased by 2 (since this a 0-sum situation, thus for each repetition less, there's also a switch more). In the second triplet instead, nothing changes in terms of number of switches and repetition. If the firs triplet found is 000 then the second triplet must belong to {110, 011}. The output will be 010 and, e.g., 100.
 When switches are greater than repetition, the desired triplets change, but the rationale is identical.
 How these triplets should be can be derived reading the code and the written-in comments. Thus, as commented above, for each successful exchange of middle elements, the balance of switches and repetitions goes up pr down by 4. From this observation and from the size of the starting imbalance between switches and
 repetitions, it can be derived how many pairs should be found and manipulated as describes above. Specifically, this number is equal to: = ((|"N-1 rep" - "N-1 sw"| - 2) / 4) + 1, that is the absolute value of the starting difference of rep and sw, minus 2, divided into 4 and taking only the integer part, plus 1.
 The (absolute) difference can only be odd, because the transitions are odd, thus either repetitions are odd or sw are odd and the difference between an odd and an even number is always odd.
 Thus, the aim is to drive such odd difference to a difference of either 1 or -1 by steps of size 4. When the difference is 1, the sequence is already balanced; when it is 3, 1 round is needed (to drive it to -1), same when difference is 5 (to drive it into 1); when difference is 7, 2 rounds are needed (to drive it to -1), same when is 9 (to drive it to 1). Thus starting from 3 (the formula is
-used only when difference is greater than 1), number of rounds is the same each two numbers (3 and 5, 7 and 9, ...) from this the "- 2" in the formula. The division by 4 is due to the steps of length 4 commented above, while the + 1 serves to convert the floor division into a celing division.
+used only when difference is greater than 1), number of rounds is the same each two numbers (3 and 5, 7 and 9, ...) from this the "- 2" in the formula. The division by 4 is due to the steps of length 4 commented above, while the + 1 serves to convert the floor division into a ceiling division.
 The success of the algorithm only depends on whether the desired triplets can be found. Indeed, with smaller lengths, like 10 trials instead of 96, failure rate is definitely higher. In order to make sure that the output is eventually obtained, the algorithm is allowed to cycle maxCounter number of times. Namely, if it cannot find the needed triplets, it will restart from a newly randomized
-sequence of 0s and 1s. The algorithm is very fast, thus it is probably best pratice to allow maxCounter to be = 10. It will never reach that value, but were it to happen, the whole process will take 3.5 x 10e(-3) seconds.
+sequence of 0s and 1s. The algorithm is very fast, thus it is probably best practice to allow maxCounter to be = 10. It will never reach that value, but were it to happen, the whole process will take 3.5 x 10e(-3) seconds.
 *Performance*: with length = 96 and only 1 attempt allowed, it never failed in 100K tests. It runs 1k loops in
 1 second.
 
@@ -118,11 +113,10 @@ sequence of 0s and 1s. The algorithm is very fast, thus it is probably best prat
 
 This functions was not fully tested as the others, thus it may still contain errors.
 Generating a sequence of elements (strings, integers) of desired length, such that each element is equally represented and the delta (N-2 repetitions) - (N-2 switches) is less than 3, in absolute value. Moreover, it avoids n-1 repetitions at all.
-It takes as an input the length of the needed sequence (trials) and the 3 strings/integers that repeat in the sequence. Trials input MUST be an EVEN number and
-a multiple of 3.
+It takes as an input the length of the needed sequence (trials) and the 3 strings/integers that repeat in the sequence. Trials input MUST be an EVEN number and a multiple of 3.
 It returns a one-column dataframe.
-The algorithm is very similar to balanceTransitionsMinus1, except it searches for 5-tuples, within which elements can be swapped and moved to obtain a n-2 repetition more or a -2 switch.
-
+*Description:*
+The algorithm is very similar to balanceTransitionsMinus1, except it searches for 5-tuples, within which elements can be swapped and moved to obtain a n-2 repetition more or a -2 switch. Since each correction made swapping elements in the 5-tuples moves the balance of n-2 rep and sw by 4, the final delta between sw and rep depends on the initial unbalance. If this is a multiple of 4, it will be leveled to 0, if it's not, the result will have an unbalance equal to the remainder of initial unbalance/ 4.
 
 #### [balanceTransitionsMinus1_str](#balanceTransitionsMinus1_str)
 Identical to balanceTransitionsMinus1, but some code at the end converts 0s and
@@ -141,11 +135,12 @@ equally frequently to each 0, 1); minusWhat that indicates whether column1 shoul
 balanceTransitionsMinus1 or of balanceTransitionsMinus2 function; maxCounter that has same meaning of
 maxCounter in balanceTransitionsMinus1
 It returns a 2-columns np.array as described.
-Performance: with trials = 96 and len(stimElmns) = 8, it does not fail in 1000 tests in each of which only one
+*Performance*: with trials = 96 and len(stimElmns) = 8, it does not fail in 1000 tests in each of which only one
 round was sufficient to get a correct output.
 It needs 7 seconds for 1k tests. Trials input must be greater or equal 10 and can go up to 10k;
 len(stimElemns) = 3 is the minimum allowed. With this value, the algorithm needs 3-4 rounds less than 1%, but
-never more than 4 in thousands of simulations. maxCounter = 10 should be a safe choice
+never more than 4 in thousands of simulations. maxCounter = 10 should be a safe choice.
+*Description:*
 The rationale is to randomize the elements sequence and then to adjust it to fix eventual repetitions
 in subsequent rows. Two vectors of elements of the correct length are created repeating the stimElmns input
 timesXtrial times, that is = trials/len(stimElmns)/2. These two vectors are permuted to shuffle elements order,
@@ -162,13 +157,16 @@ value found.
 #### [orderStimWithinTasks_str](#orderStimWithinTasks_str)
 
 Identical to balanceTransitionsMinus1, but some code at the end converts 0s and
-1s into the input-defined string.
+1s into the input-defined string. This does not
 
 #### [noStimRepetition](#noStimRepetition)
 
 Generates a sequence of length trials without n minus 1 repetitions.
 Takes as inputs the length of the needed sequence (int) and either a list with
-the elements to be equally represented in the sequence, or a list with same length as the first input that the users want to pseudoshuffle.
+the elements to be equally represented in the sequence, or a list with same length as the first input that the users want to pseudo-shuffle.
+*Description:*
+It uses the same logic of orderStimWithinTasks_str without the constraints due to the other column. The list is generated repeating the elements or is given as input. It is randomized and then checked for n-1 repetitions. As soon as one is found, the sequence is searched for an element to swap with element n, such that that repetition is eliminated and another is not created. To this aim, the swapping element must be different from n and also from n+1; furthermore, the elements following and preceding the swapping candidate must be also different from n. This is repeated in a loop as many times as n-1 repetitions were found in the initial, random generated, sequence.
+*Performance*: The algorithm has never failed in adjusting a sequence in 100k simulations with length 16 trials and 8 stimuli equally represented.
 
 
 #### [shuffle_rows](#shuffle_rows)

@@ -164,7 +164,6 @@ def balanceTransitionsMinus1(trials):
     seqAndDiff = [seq.astype(int), rep, sw]
     return seqAndDiff
 
-#
 
 def balanceTransitionsMinus1_str(trials, task0, task1):
     """Balance n-1 repetitions and switches
@@ -538,9 +537,8 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat):
         # assign 1 to seqCompleted variable to exit the while loop
         if (not any(bool_2inARow)) and equalTimes:
             seqCompleted = 1
-    #return stimAndTask, taskSeq, counter]
+    #return [stimAndTask, taskSeq, counter]
     return stimAndTask
-
 
 def orderStimWithinTasks_str(trials, stimElmns, minusWhat, task0, task1):
     """Assign stimuli to taks in balanced fashion
@@ -640,21 +638,11 @@ def orderStimWithinTasks_str(trials, stimElmns, minusWhat, task0, task1):
     #return [stimAndTask_df, taskSeq, counter]
     return stimAndTask_df
 
-# trials = 96
-# stimElmns = list(range(1,5)) + list(range(6,10))
-# task0 = "magnit"
-# task1 = "parity"
-# stimAndTask = orderStimWithinTasks_str(trials, stimElmns, 1, task0, task1)
-# for i in stimElmns:
-#     print sum(stimAndTask["stim"] == i)
-
-
-# test for stimAndTask performance and correctness
+# # test for orderStimWithinTasks performance and correctness
 # trials = 96
 # #stimElmns = list(range(1,5)) + list(range(6,10))
 # stimElmns = list(range(3))
 # minusWhat = 1
-# maxCounter = 4
 # nSim = 100
 # counterSim = [0]*nSim
 # for sim in range(nSim):
@@ -682,10 +670,22 @@ def orderStimWithinTasks_str(trials, stimElmns, minusWhat, task0, task1):
 #     if not all(taskSeq == stimAndTask[:,0]):
 #         print("the final sequence of tasks (0 and 1) is not identical to the starting one.")
 # counterHist = sum([g>1 for g in counterSim])
-# print("times the algorithm has run more than once: " + str(counterHist))
+# print(
+#     "the algorithm has run more than once "\
+#      + str(counterHist) + " times over " + str(nSim) + " simulations and\
+#      \n if no other print has come out, the function has run without errors.")
 #
 # # test speed in 100 rounds:
 # print("orderStimWithinTasks in 100 simulations: " + str(timeit.timeit(stmt= "orderStimWithinTasks(96, list(range(1,5)) + list(range(6,10)), 1)", number = 100, setup="from __main__ import orderStimWithinTasks")))
+#
+# # further check for orderStimWithinTasks_str
+# trials = 96
+# stimElmns = list(range(1,5)) + list(range(6,10))
+# task0 = "magnit"
+# task1 = "parity"
+# stimAndTask = orderStimWithinTasks_str(trials, stimElmns, 1, task0, task1)
+# for i in stimElmns:
+#     print sum(stimAndTask["stim"] == i)
 
 def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
     """sequence of integers that don't repeat in a row
@@ -759,7 +759,7 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
     return stimSeq
 
 # test for effectiveness of the removal of numbers repetitions
-# nSim = 1000
+# nSim = 100
 # trials = 16
 # stimElmns = [1,2,3,4,6,7,8,9]
 # counterSim = [0]*nSim
@@ -768,20 +768,25 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
 #     stimSeq = stimAndCount[0]
 #     counter = stimAndCount[1]
 #     counterSim[sim] = counter
+#
+#     vec = [0]*trials # preallocate an array: trials is the max lenght allowed for stimElmn list
+#     for i in stimElmns: # fill in the array with the times each element is found
+#         vec[i] = sum(stimSeq == i)
+#     vec1 = [vec[i] for i in stimElmns] # take only the relevant positions of vec (some will be 0)
+#     equalTimes = all(x == vec1[0] for x in vec1) # are number of times all the same?
+#     if not equalTimes:
+#         print("the elements are not equally represented")
+#
 #     for jj in range(1, trials):
 #             if stimSeq[jj] == stimSeq[jj-1]:
 #                 print ("2 equal stimuli are found in subsequent positions in sim: " + str(sim))
 # counterHist = sum([g>1 for g in counterSim])
-# #print("times the algorithm has run more than once: " + str(counterHist))
-# print(counterHist)
-# print(stimSeq)
-# print(type(stimSeq))
-#
-# vec = [0]*trials # preallocate an array: trials is the max lenght allowed for stimElmn list
-# for i in stimElmns: # fill in the array with the times each element is found
-#     vec[i] = sum(stimSeq == i)
-# vec1 = [vec[i] for i in stimElmns] # take only the relevant positions of vec (some will be 0)
-# equalTimes = all(x == vec1[0] for x in vec1) # are number of times all the same?
+# print(
+#     "the algorithm has run more than once "\
+#      + str(counterHist) + " times over " + str(nSim) + " simulations and\
+#      \n if no other print has come out, the function has run without errors."
+#      )
+
 
 def shuffle_rows(res, df2shuf, targetCol):
     """merge back a column in the dataframe
