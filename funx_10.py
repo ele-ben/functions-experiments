@@ -21,7 +21,7 @@ functions:
     * noStimRepetition
     * shuffle_rows
     * df_BooleanOrder
-    * balanceNMinus2_ABC - still developing
+    * balanceNMinus2_str - still developing
 """
 
 import random, numpy as np
@@ -461,7 +461,7 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat):
     rows where column1 = 1.
 
     minusWhat parameter is to be set to 1. You may want to substitute
-    balanceTransitionsMinus2 function in the function with the ABC version
+    balanceTransitionsMinus2 function in the function with the -str newer version
 
     Parameters
     ----------
