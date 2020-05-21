@@ -21,7 +21,7 @@ functions:
     * noStimRepetition
     * shuffle_rows
     * df_BooleanOrder
-    * balanceNMinus2_ABC - new version with 3 tasks
+    * balanceNMinus2_ABC - still developing
 """
 
 import random, numpy as np
@@ -853,7 +853,6 @@ def DfBooleanOrder(df2shuf, targetCol, stimSeq, taskCol, taskSeq):
         df2shuf.reset_index(inplace = True, drop= True)
     return df_output
 
-# # SOLVE!
 # # Test for DfBooleanOrder and shuffle_rows
 # # create toy variables for the test:
 # task = ["magnit", "parity "]
@@ -895,11 +894,11 @@ def DfBooleanOrder(df2shuf, targetCol, stimSeq, taskCol, taskSeq):
 # %timeit -r 10 DfBooleanOrder(df2shuf, targetCol, stimSeq, taskCol, taskSeq)
 
 
-def balanceNMinus2_ABC(trials, A, B, C):
+def balanceNMinus2_str(trials, A, B, C):
     """balance n-2 repetitions and switch and avoid n-1 repetitions
 
     Generates a sequence of length trials of elements A,B and C with almost
-    balanced number of sw and repeitions (by now allows a delta of 3, it can
+    balanced number of sw and repetitions (by now allows a delta of 3, it can
     be restricted to 2 or 1 without the performance changing much)
 
     Parameters
@@ -979,11 +978,11 @@ def balanceNMinus2_ABC(trials, A, B, C):
             #print("abbiamo un problema Huston " + str(rep) + " " + str(sw))
         ABCbalance = sum(seq == 0) == sum(seq == 1) == sum(seq == 2)
         if not ABCbalance:
-            print("abbiamo un altro problema Huston" + str(sum(seq == 0)) + " " + str(sum(seq == 1)) + " " + str(sum(seq == 2)))
+            print("no same number of A, B and C" + str(sum(seq == 0)) + " " + str(sum(seq == 1)) + " " + str(sum(seq == 2)))
         nMinus1Absence = 1
         for i in range(1,trials):
             if seq[i] == seq[i-1]:
-                print("abbiamo un terzo problema Huston")
+                print("there's a n-1 repetition")
                 nMinus1Absence = 0
         if nMinus1Absence and ABCbalance and nMinus2Balance:
             seq_Completed = 1
