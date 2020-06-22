@@ -19,6 +19,9 @@ Then import the functions using:
 To get the help of a function type
 
     $ help(function_name)
+	
+#### Other files
+The folder contains also a PsychoPy_display_Funx.py file with functions specific for PsychoPy which accomplish different aims and it is not useful for pseudorandomization.
 
 ### Improvements of version 10
 - [balanceNMinus2_str](#balanceNMinus2_str) includes 3 tasks and balance n-2 repetions and switch while avoiding n-1 repetitions
