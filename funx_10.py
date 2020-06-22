@@ -87,7 +87,7 @@ def balanceTransitionsMinus1(trials):
             Rounds = ((diff - 2) // 4) + 1 # how many rounds I need to fix the imbalance
             #print(str(Rounds))
             for j in range(1, Rounds+1):
-                #print("siamo in più rep")
+                #print("we are in more rep situation")
                 strt = randint(0, trials-1) # I start from a random position in the sequence
                 success = 0
                 for i in range(trials-3): #I loop over the sequence
