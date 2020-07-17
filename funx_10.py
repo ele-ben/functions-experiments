@@ -541,7 +541,7 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat = 1):
     #return [stimAndTask, taskSeq, counter]
     return stimAndTask
 
-def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
+def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
     """Assign stimuli to taks in balanced fashion
 
     as its _str-less version.
@@ -560,7 +560,7 @@ def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
     Parameters
     ----------
     trials: the lenght of the needed sequence (int)
-    stimLst: list with the elements of the second column
+    stimElmns: list with the elements of the second column
     minusWhat: either 1 for balanceTransitionsMinus1 or 2.
 
     Returns
@@ -568,8 +568,8 @@ def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
     pd.DataFrame
         2 columns df with trials rows
     """
-    if (trials/2)%len(stimLst) != 0:
-            raise ValueError("stimLst list length must be a divisor of trials/2, otherwise balancing is not possible by construction. Also, trials must even integer")
+    if (trials/2)%len(stimElmns) != 0:
+            raise ValueError("stimElmns list length must be a divisor of trials/2, otherwise balancing is not possible by construction. Also, trials must even integer")
     maxCounter = 10
     seqCompleted = 0
     counter = 0
@@ -582,9 +582,9 @@ def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
             raise ValueError("minusWhat must be either 1, if you want to balance n-1 rep and sw, or 2, if you want to balance n-2 rep and sw")
         stimAndTask = np.c_[taskSeq, np.zeros(trials)] # prepare an array trials*2 where the first column is trialSeq
         # transform stimELemns into a list of integers to be able to use np arrays
-        stimElmns = list(range(len(stimLst)))
+        stim2num = list(range(len(stimElmns)))
         timesXtrial = trials/len(stimElmns)/2 # calculate how many times each stim stands with each of the 2 tasks
-        stimLst = np.repeat(stimElmns,timesXtrial) # replicate the list with unique stimuli this number of times
+        stimLst = np.repeat(stim2num,timesXtrial) # replicate the list with unique stimuli this number of times
         for task in range(2): # for task 0 and 1, create a vector of randomized stimuli
             stimSeq = np.random.permutation(stimLst)
             currTask = np.where(taskSeq == task)[0]
@@ -618,9 +618,9 @@ def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
         counter += 1
         vec = [[0]*int(trials/2), [0]*int(trials/2)] # preallocate an array: trials/2 is the max lenght allowed for stimElmn list
         for task in range(2):
-            for i in stimElmns: # fill in the array with the times each element is found aside 0 and 1
+            for i in stim2num: # fill in the array with the times each element is found aside 0 and 1
                 vec[task][i] = sum(np.logical_and(stimAndTask[:,1] == i,stimAndTask[:,0] == task))
-            vec1 = [vec[task][i] for i in stimElmns] # take only the relevant positions of vec (some will be 0)
+            vec1 = [vec[task][i] for i in stim2num] # take only the relevant positions of vec (some will be 0)
             equalTimes = all(x== vec1[0] for x in vec1) # are number of time all the same within a task?
             if (not equalTimes) and counter > maxCounter:
                 raise Warning("the function is wrong: stimuli are not equally represented in task " + str(task))
@@ -641,28 +641,28 @@ def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
             task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
             stimAndTask_df.loc[task1_indx, 'task'] = task1
             # substitute numerical stim with stim elements
-            for s in stimElmns:
+            for s in stim2num:
                 s_indx = stimAndTask_df[stimAndTask_df['stim'] == s].index
-                stimAndTask_df.loc[s_indx, 'stim'] = stimLst[s]
+                stimAndTask_df.loc[s_indx, 'stim'] = stimElmns[s]
     #return [stimAndTask_df, taskSeq, counter]
     return stimAndTask_df
 
 # # test for orderStimWithinTasks performance and correctness
 # trials = 96
 # #stimLst = list(range(1,5)) + list(range(6,10))
-# stimLst = list(range(3))
+# stimElmns = list(range(3))
 # minusWhat = 1
 # nSim = 100
 # counterSim = [0]*nSim
 # for sim in range(nSim):
 #     #print i
-#     stimAndTask_TaskSeq = orderStimWithinTasks(trials, stimLst, minusWhat)
+#     stimAndTask_TaskSeq = orderStimWithinTasks(trials, stimElmns)
 #     stimAndTask = stimAndTask_TaskSeq[0]
 #     # to check taskSeq integrity and internal counter you have to include them in the list of objects that
 #     # orderStimWithinTasks "returns"
 #     taskSeq = stimAndTask_TaskSeq[1]
 #     counter = stimAndTask_TaskSeq[2]
-#     vec = [[0]*(len(stimLst)+2), [0]*(len(stimLst)+2)]
+#     vec = [[0]*(len(stimElmns)+2), [0]*(len(stimElmns)+2)]
 #     counterSim[sim] = counter
 #     for task in range(2):
 #         for i in stimElmns:
@@ -689,12 +689,19 @@ def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
 #
 # # further check for orderStimWithinTasks_str
 # trials = 96
-# stimElmns = list(range(1,5)) + list(range(6,10))
+# stimElmns = ['GLASSES', 'LETTER', 'CAR', 'WALL', 'FLOWER', 'BIRD', 'TREE', 'MONKEY']
 # task0 = "magnit"
 # task1 = "parity"
-# stimAndTask = orderStimWithinTasks_str(trials, stimElmns, 1, task0, task1)
-# for i in stimElmns:
-#     print sum(stimAndTask["stim"] == i)
+# counterSim = [0]*nSim
+# nSim = 100
+# for sim in range(nSim):
+#     stimAndTask = orderStimWithinTasks_str(trials, stimElmns, task0, task1)
+#     for i in stimLst:
+#         print(sum(stimAndTask["stim"] == i))
+#     # test for effectiveness of the removal of numbers repetitions
+#     for jj in range(1, trials):
+#             if stimAndTask.loc[jj, "stim"] == stimAndTask.loc[jj-1, "stim"]:
+#                 print ("2 equal stimuli are found in subsequent positions in sim: " + str(sim))
 
 def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
     """sequence of integers that don't repeat in a row
