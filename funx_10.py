@@ -541,7 +541,7 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat = 1):
     #return [stimAndTask, taskSeq, counter]
     return stimAndTask
 
-def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
+def orderStimWithinTasks_str(trials, stimLst, task0, task1, minusWhat = 1):
     """Assign stimuli to taks in balanced fashion
 
     as its _str-less version.
@@ -560,7 +560,7 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
     Parameters
     ----------
     trials: the lenght of the needed sequence (int)
-    stimElmns: list with the elements of the second column
+    stimLst: list with the elements of the second column
     minusWhat: either 1 for balanceTransitionsMinus1 or 2.
 
     Returns
@@ -568,8 +568,8 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
     pd.DataFrame
         2 columns df with trials rows
     """
-    if (trials/2)%len(stimElmns) != 0:
-            raise ValueError("stimElmns list length must be a divisor of trials/2, otherwise balancing is not possible by construction. Also, trials must even integer")
+    if (trials/2)%len(stimLst) != 0:
+            raise ValueError("stimLst list length must be a divisor of trials/2, otherwise balancing is not possible by construction. Also, trials must even integer")
     maxCounter = 10
     seqCompleted = 0
     counter = 0
@@ -581,6 +581,8 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
         else:
             raise ValueError("minusWhat must be either 1, if you want to balance n-1 rep and sw, or 2, if you want to balance n-2 rep and sw")
         stimAndTask = np.c_[taskSeq, np.zeros(trials)] # prepare an array trials*2 where the first column is trialSeq
+        # transform stimELemns into a list of integers to be able to use np arrays
+        stimElmns = list(range(len(stimLst)))
         timesXtrial = trials/len(stimElmns)/2 # calculate how many times each stim stands with each of the 2 tasks
         stimLst = np.repeat(stimElmns,timesXtrial) # replicate the list with unique stimuli this number of times
         for task in range(2): # for task 0 and 1, create a vector of randomized stimuli
@@ -632,30 +634,35 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
         # assign 1 to seqCompleted variable to exit the while loop
         if (not any(bool_2inARow)) and equalTimes:
             seqCompleted = 1
+            # substitute 1 and 0 with the task names
             stimAndTask_df = pd.DataFrame(stimAndTask, columns = ['task', 'stim'])
             task0_indx = stimAndTask_df[stimAndTask_df['task'] == 0].index
             stimAndTask_df.loc[task0_indx, 'task'] = task0
             task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
             stimAndTask_df.loc[task1_indx, 'task'] = task1
+            # substitute numerical stim with stim elements
+            for s in stimElmns:
+                s_indx = stimAndTask_df[stimAndTask_df['stim'] == s].index
+                stimAndTask_df.loc[s_indx, 'stim'] = stimLst[s]
     #return [stimAndTask_df, taskSeq, counter]
     return stimAndTask_df
 
 # # test for orderStimWithinTasks performance and correctness
 # trials = 96
-# #stimElmns = list(range(1,5)) + list(range(6,10))
-# stimElmns = list(range(3))
+# #stimLst = list(range(1,5)) + list(range(6,10))
+# stimLst = list(range(3))
 # minusWhat = 1
 # nSim = 100
 # counterSim = [0]*nSim
 # for sim in range(nSim):
 #     #print i
-#     stimAndTask_TaskSeq = orderStimWithinTasks(trials, stimElmns, minusWhat)
+#     stimAndTask_TaskSeq = orderStimWithinTasks(trials, stimLst, minusWhat)
 #     stimAndTask = stimAndTask_TaskSeq[0]
 #     # to check taskSeq integrity and internal counter you have to include them in the list of objects that
 #     # orderStimWithinTasks "returns"
 #     taskSeq = stimAndTask_TaskSeq[1]
 #     counter = stimAndTask_TaskSeq[2]
-#     vec = [[0]*(len(stimElmns)+2), [0]*(len(stimElmns)+2)]
+#     vec = [[0]*(len(stimLst)+2), [0]*(len(stimLst)+2)]
 #     counterSim[sim] = counter
 #     for task in range(2):
 #         for i in stimElmns:
