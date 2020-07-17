@@ -114,7 +114,7 @@ def balanceTransitionsMinus1(trials):
             Rounds = ((abs(diff) - 2) // 4) + 1 # how many rounds I need to fix the imbalance
             #print(str(Rounds))
             for j in range(1, Rounds+1):
-                #print("siamo in più sw")
+                #print("we are in more sw situation")
                 strt = randint(0, trials-1) # I start from a random position in the sequence
                 success = 0
                 for i in range(trials-3): #I loop over the sequence
@@ -221,7 +221,7 @@ def balanceTransitionsMinus1_str(trials, task0, task1):
             Rounds = ((diff - 2) // 4) + 1 # how many rounds I need to fix the imbalance
             #print(str(Rounds))
             for j in range(1, Rounds+1):
-                #print("siamo in più rep")
+                #print("we are in more rep situation")
                 strt = randint(0, trials-1) # I start from a random position in the sequence
                 success = 0
                 for i in range(trials-3): #I loop over the sequence
@@ -248,7 +248,7 @@ def balanceTransitionsMinus1_str(trials, task0, task1):
             Rounds = ((abs(diff) - 2) // 4) + 1 # how many rounds I need to fix the imbalance
             #print(str(Rounds))
             for j in range(1, Rounds+1):
-                #print("siamo in più sw")
+                #print("we are in more sw situation")
                 strt = randint(0, trials-1) # I start from a random position in the sequence
                 success = 0
                 for i in range(trials-3): #I loop over the sequence
@@ -448,7 +448,7 @@ def balanceTransitionsMinus2(trials):
 #     print("the sequence is not balanced in its n-2 transitions. The diff betw sw and rep is different from 0")
 #
 
-def orderStimWithinTasks(trials, stimElmns, minusWhat):
+def orderStimWithinTasks(trials, stimElmns, minusWhat = 1):
     """Assign stimuli to taks in balanced fashion
 
     Generates a 2-columns array, with column 1 containing the output of a
@@ -459,8 +459,9 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat):
     (c) each element will be equally often in rows where column1 = 0 and
     rows where column1 = 1.
 
-    minusWhat parameter is to be set to 1. You may want to substitute
+    minusWhat parameter is 1 by default. You may want to substitute
     balanceTransitionsMinus2 function in the function with the -str newer version
+    and call the fun with minusWhat = 2 to have balanced n-2 rep and sw
 
     Parameters
     ----------
@@ -540,7 +541,7 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat):
     #return [stimAndTask, taskSeq, counter]
     return stimAndTask
 
-def orderStimWithinTasks_str(trials, stimElmns, minusWhat, task0, task1):
+def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
     """Assign stimuli to taks in balanced fashion
 
     as its _str-less version.
@@ -552,8 +553,9 @@ def orderStimWithinTasks_str(trials, stimElmns, minusWhat, task0, task1):
     (c) each element will be equally often in rows where column1 = 0 and
     rows where column1 = 1.
 
-    minusWhat parameter is to be set to 1. You may want to substitute
-    balanceTransitionsMinus2 function in the function with the ABC version
+    minusWhat parameter is 1 by default. You may want to substitute
+    balanceTransitionsMinus2 function in the function with the ABC version and
+    call the fun with minusWhat = 2 to balance n-2 rep and sw
 
     Parameters
     ----------
@@ -980,7 +982,7 @@ def balanceNMinus2_str(trials, A, B, C):
         post_diff = rep - sw
         nMinus2Balance = abs(post_diff) <= 2
         #if not nMinus2Balance:
-            #print("abbiamo un problema Huston " + str(rep) + " " + str(sw))
+            #print("we have a problem " + str(rep) + " " + str(sw))
         ABCbalance = sum(seq == 0) == sum(seq == 1) == sum(seq == 2)
         if not ABCbalance:
             print("no same number of A, B and C" + str(sum(seq == 0)) + " " + str(sum(seq == 1)) + " " + str(sum(seq == 2)))
