@@ -164,7 +164,6 @@ def balanceTransitionsMinus1(trials):
     seqAndDiff = [seq.astype(int), rep, sw]
     return seqAndDiff
 
-
 def balanceTransitionsMinus1_str(trials, task0, task1):
     """Balance n-1 repetitions and switches
 
@@ -703,7 +702,7 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
 #             if stimAndTask.loc[jj, "stim"] == stimAndTask.loc[jj-1, "stim"]:
 #                 print ("2 equal stimuli are found in subsequent positions in sim: " + str(sim))
 
-def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
+def noStimRepetition(trials, stimElmns = [1], stimLst = []):
     """sequence of integers that don't repeat in a row
 
     Generates a sequence of length trials without n minus 1 repetitions
@@ -732,7 +731,7 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
     counter = 0
     while seqCompleted == 0 and counter <= maxCounter:
         #stimAndTask = np.zeros(trials) # prepare a vec
-        if stimLst == "": # if stimList is empty, generate it based on stimElmns & trials
+        if not stimLst: # if stimList is empty, generate it based on stimElmns & trials
             timesXstim = trials/len(stimElmns) # calculate how many times each stim appears
             # if there are str you need transformation to use np array in the fun
             if any(isinstance(i, str) for i in stimElmns):
@@ -785,11 +784,11 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = ""):
         for s in stimLst:
             s_indx = stimSeq_series[stimSeq_series == s].index
             stimSeq_series.loc[s_indx] = stimElmns[s]
-        return [stimSeq_series, counter]
-        #return stimSeq_series
+        #return [stimSeq_series, counter]
+        return stimSeq_series
     else:
-        #return stimSeq
-        return [stimSeq, counter]
+        return stimSeq
+        #return [stimSeq, counter]
 
 
 #test for effectiveness of the removal of numbers repetitions
@@ -797,6 +796,7 @@ nSim = 100
 trials = 32
 #stimElmns = [1,2,3,4]
 stimElmns = ['GLASSES', 'LETTER', 'CAR', 'WALL', 'FLOWER', 'BIRD', 'TREE', 'MONKEY']
+stimAndCount = noStimRepetition(trials, stimElmns = stimElmns)
 counterSim = [0]*nSim
 for sim in range(nSim):
     stimAndCount = noStimRepetition(trials, stimElmns = stimElmns)
