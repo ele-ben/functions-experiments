@@ -20,7 +20,7 @@ functions:
     * orderStimWithinTasks_str
     * noStimRepetition
     * shuffle_rows
-    * df_BooleanOrder
+    * DfBooleanOrder
     * balanceNMinus2_str - still developing
 """
 
@@ -763,7 +763,8 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = []):
         # increase counter
         counter += 1
         # test for numbers assignment, only run the test if a stimLst is not given
-        if stimLst == "":
+        #if not stimLst:
+        if stimLst == []:
             vec = [0]*trials # preallocate an array: trials is the max lenght allowed for stimElmn list
             for i in stimLst: # fill in the array with the times each element is found
                 vec[i] = sum(stimSeq == i)
@@ -791,47 +792,47 @@ def noStimRepetition(trials, stimElmns = [1], stimLst = []):
         #return [stimSeq, counter]
 
 
-#test for effectiveness of the removal of numbers repetitions
-nSim = 100
-trials = 32
-#stimElmns = [1,2,3,4]
-stimElmns = ['GLASSES', 'LETTER', 'CAR', 'WALL', 'FLOWER', 'BIRD', 'TREE', 'MONKEY']
-stimAndCount = noStimRepetition(trials, stimElmns = stimElmns)
-counterSim = [0]*nSim
-for sim in range(nSim):
-    stimAndCount = noStimRepetition(trials, stimElmns = stimElmns)
-    stimSeq = stimAndCount[0]
-    counter = stimAndCount[1]
-    counterSim[sim] = counter
-    # Different tests for np.array and pd.Series
-    if all(isinstance(i, int) for i in stimElmns): # these tests only works for in stimElmns
-        # check eqaulr representation of stim
-        vec = [0]*trials # preallocate an array: trials is the max lenght allowed for stimElmn list
-        for i in stimElmns: # fill in the array with the times each element is found
-            vec[i] = sum(stimSeq == i)
-        vec1 = [vec[i] for i in stimElmns] # take only the relevant positions of vec (some will be 0)
-        equalTimes = all(x == vec1[0] for x in vec1) # are number of times all the same?
-        if not equalTimes:
-            print("the elements are not equally represented")
-        # check n-1 repetitions
-        for jj in range(1, trials):
-                if stimSeq[jj] == stimSeq[jj-1]:
-                    print ("2 equal stimuli are found in subsequent positions in sim: " + str(sim))
-    else: # the follwing tests only work for pd.Series
-        for jj in range(1, trials):
-                if stimSeq.loc[jj] == stimSeq.loc[jj-1]:
-                    print ("2 equal stimuli are found in subsequent positions in sim: " + str(sim))
-
-        for i in stimElmns:
-            if sum(stimSeq == i) != (trials/len(stimElmns)):
-                print("the elements are not equally represented")
-# check the history of the fun runs in each simulation
-counterHist = sum([g>1 for g in counterSim])
-print(
-    "the algorithm has run more than once "\
-     + str(counterHist) + " times over " + str(nSim) + " simulations and\
-     \n if no other print has come out, the function has run without errors."
-     )
+# #test for effectiveness of the removal of numbers repetitions
+# nSim = 100
+# trials = 32
+# #stimElmns = [1,2,3,4]
+# stimElmns = ['GLASSES', 'LETTER', 'CAR', 'WALL', 'FLOWER', 'BIRD', 'TREE', 'MONKEY']
+# stimAndCount = noStimRepetition(trials, stimElmns = stimElmns)
+# counterSim = [0]*nSim
+# for sim in range(nSim):
+#     stimAndCount = noStimRepetition(trials, stimElmns = stimElmns)
+#     stimSeq = stimAndCount[0]
+#     counter = stimAndCount[1]
+#     counterSim[sim] = counter
+#     # Different tests for np.array and pd.Series
+#     if all(isinstance(i, int) for i in stimElmns): # these tests only works for in stimElmns
+#         # check eqaulr representation of stim
+#         vec = [0]*trials # preallocate an array: trials is the max lenght allowed for stimElmn list
+#         for i in stimElmns: # fill in the array with the times each element is found
+#             vec[i] = sum(stimSeq == i)
+#         vec1 = [vec[i] for i in stimElmns] # take only the relevant positions of vec (some will be 0)
+#         equalTimes = all(x == vec1[0] for x in vec1) # are number of times all the same?
+#         if not equalTimes:
+#             print("the elements are not equally represented")
+#         # check n-1 repetitions
+#         for jj in range(1, trials):
+#                 if stimSeq[jj] == stimSeq[jj-1]:
+#                     print ("2 equal stimuli are found in subsequent positions in sim: " + str(sim))
+#     else: # the follwing tests only work for pd.Series
+#         for jj in range(1, trials):
+#                 if stimSeq.loc[jj] == stimSeq.loc[jj-1]:
+#                     print ("2 equal stimuli are found in subsequent positions in sim: " + str(sim))
+#
+#         for i in stimElmns:
+#             if sum(stimSeq == i) != (trials/len(stimElmns)):
+#                 print("the elements are not equally represented")
+# # check the history of the fun runs in each simulation
+# counterHist = sum([g>1 for g in counterSim])
+# print(
+#     "the algorithm has run more than once "\
+#      + str(counterHist) + " times over " + str(nSim) + " simulations and\
+#      \n if no other print has come out, the function has run without errors."
+#      )
 
 
 def shuffle_rows(res, df2shuf, targetCol):
