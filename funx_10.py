@@ -295,7 +295,8 @@ def balanceTransitionsMinus1_str(trials, task0, task1):
             raise Warning("N - 1 transitions couldn't be balanced by balanceTransitionsMinus1_str function")
     # if everything ends
     seqAndDiff = [seq, rep, sw]
-    return seqAndDiff
+    return seqAndDiff # need this one for orderStimWithinTasks!
+    #return seq
 
 # nSim = 10000
 # trials = 96
