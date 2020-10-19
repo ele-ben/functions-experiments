@@ -167,9 +167,11 @@ def balanceTransitionsMinus1(trials):
 def balanceTransitionsMinus1_str(trials, task0, task1):
     """Balance n-1 repetitions and switches
 
-    as its _str-less version
-    Changing 0 and 1 with strings: task0 and task1 arguments can be int or
-    strings
+    as balanceTransitionsMinus1, only changes 0 and 1 with strings: task0 and 
+    task1 arguments can be int or strings. It outputs a list, with the sequence,
+    number of reps and number of switches, thus MAKE SURE you get only the first
+    element if you want the sequence only. Like:
+    mySequence = balanceTransitionsMinus1_str(trials, task0, task1)[0]
 
     Parameters
     ----------
@@ -180,7 +182,7 @@ def balanceTransitionsMinus1_str(trials, task0, task1):
     Returns
     -------
     list
-        seq of length = trials; the number of repetions; number of switches
+        the sequence; the number of repetions; number of switches
     """
     maxCounter = 4
     if type(trials) != int:
