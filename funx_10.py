@@ -167,7 +167,7 @@ def balanceTransitionsMinus1(trials):
 def balanceTransitionsMinus1_str(trials, task0, task1):
     """Balance n-1 repetitions and switches
 
-    as balanceTransitionsMinus1, only changes 0 and 1 with strings: task0 and 
+    as balanceTransitionsMinus1, only changes 0 and 1 with strings: task0 and
     task1 arguments can be int or strings. It outputs a list, with the sequence,
     number of reps and number of switches, thus MAKE SURE you get only the first
     element if you want the sequence only. Like:
@@ -643,9 +643,8 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
             task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
             stimAndTask_df.loc[task1_indx, 'task'] = task1
             # substitute numerical stim with stim elements
-            for s in stim2num:
-                s_indx = stimAndTask_df[stimAndTask_df['stim'] == s].index
-                stimAndTask_df.loc[s_indx, 'stim'] = stimElmns[s]
+            for jj in range(len(stimAndTask_df)):
+                stimAndTask_df["stim"].loc[jj] = stimElmns[int(stimAndTask_df["stim"].loc[jj])]
     #return [stimAndTask_df, taskSeq, counter]
     return stimAndTask_df
 
