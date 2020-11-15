@@ -643,12 +643,17 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
             task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
             stimAndTask_df.loc[task1_indx, 'task'] = task1
             # substitute numerical stim with stim elements
+            # first make the stim col into an int col to get rid of .0
+            stimAndTask_df = stimAndTask_df.astype({'stim': 'int'})
+            # then into string, so that it is ready to get string stimuli
+            stimAndTask_df = stimAndTask_df.astype({'stim': 'str'})
             for jj in range(len(stimAndTask_df)):
-                stimAndTask_df["stim"].loc[jj] = stimElmns[int(stimAndTask_df["stim"].loc[jj])]
+                #stimAndTask_df["stim"].loc[jj] = stimElmns[int(stimAndTask_df["stim"].loc[jj])]
+                stimAndTask_df.at[jj, "stim"] = stimElmns[int(stimAndTask_df["stim"].loc[jj])]
     #return [stimAndTask_df, taskSeq, counter]
     return stimAndTask_df
 
-# # test for orderStimWithinTasks performance and correctness
+# #  ------- test for orderStimWithinTasks performance and correctness --------
 # trials = 96
 # #stimLst = list(range(1,5)) + list(range(6,10))
 # stimElmns = list(range(3))
@@ -688,16 +693,17 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
 # # test speed in 100 rounds:
 # print("orderStimWithinTasks in 100 simulations: " + str(timeit.timeit(stmt= "orderStimWithinTasks(96, list(range(1,5)) + list(range(6,10)), 1)", number = 100, setup="from __main__ import orderStimWithinTasks")))
 #
-# # further check for orderStimWithinTasks_str
+# # ------------ Further check for orderStimWithinTasks_str -----------------
+# orderStimWithinTasks_str(40, [1,2,3,4], "task0", "task1")
 # trials = 96
 # stimElmns = ['GLASSES', 'LETTER', 'CAR', 'WALL', 'FLOWER', 'BIRD', 'TREE', 'MONKEY']
 # task0 = "magnit"
 # task1 = "parity"
 # counterSim = [0]*nSim
-# nSim = 100
+# nSim = 10
 # for sim in range(nSim):
-#     stimAndTask = orderStimWithinTasks_str(trials, stimElmns, task0, task1)
-#     for i in stimLst:
+#     stimAndTask = orderStimWithinTasks_str(trials, stimElmns, task0, task1)[0]
+#     for i in stimElmns:
 #         print(sum(stimAndTask["stim"] == i))
 #     # test for effectiveness of the removal of numbers repetitions
 #     for jj in range(1, trials):
