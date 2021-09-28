@@ -1070,3 +1070,124 @@ def balanceNMinus2_str(trials, A, B, C):
 #         print sim
 # print "this is the number of times there was an error " + str(counterSim)
 # print "this is the history of counter in " + str(nSim) + " simulations: " + str(coun)
+
+import math
+
+def exact_repetition_proportion(trials, percent_rep, task0, task1):
+    """ Generate sequence with certain proportion of repetitions
+
+    Generates a sequence of length trials of elements A and B with the porportion
+    of repetitions indicated by percent_rep. Max one rep more or one less than
+    the exact proportion
+    ! Currently, does not allow less than 50% repetitions !
+
+    Parameters
+    ----------
+    trials: int
+        the lenght of the needed sequence
+    percent_rep: float
+        proportion of rep over number of trials, must be between 0 and 1 excl.
+    A: str,
+        name of task A, must be different from B
+    B: str,
+        name of task B
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with same number of A, B and C and almost balanced n-2
+        repetitions and switches
+    """
+
+    # how many repetitions, rounded to closest lower integer
+    n_rep = math.floor(trials*percent_rep)
+
+    # create sequence with 50% rep and 50% switch
+    # seq len should be trials - abs(wnated_sw-wanted_repetitions)
+    init_seq_len = trials - abs(trials- n_rep - n_rep) # will always be even
+    # generate sequence with custom fnction
+    init_seq_out = balanceTransitionsMinus1_str(init_seq_len, task0, task1)
+    init_seq = init_seq_out[0]
+    # number of actual repetitions in the sequence
+    init_rep = init_seq_out[1]
+    # if n_rep < rep
+    # compute number of rep to add as difference between wanted repetitions and
+    # actual ones
+    rep = n_rep - init_rep
+    # round to the closest smaller even number
+    if rep%2 != 0:
+        rep = rep - 1
+
+    # create copy of initial seq
+    final_seq = [init_seq[i] for i in range(init_seq_len)]
+
+    # We add rep/2 repetitions to each task, to keep same number of task1 and 0
+    # create counters counter of added repetitions per task
+    ones = 0
+    zeros = 0
+    tasks = [task1, task0]
+    counters = [ones, zeros]
+
+    for r in range(2): # for task0 and 1
+        while counters[r] < rep/2: # while number of missing repetitions is not over
+            # draw a random position (trial) where task is either task0 or task1
+            i = random.choice([i for i in range(len(final_seq)) if final_seq[i] == tasks[r]])
+            final_seq.insert(i+1, final_seq[i]) # and make it into a repetition
+            counters[r] += 1 # increase counter
+
+    #these redudnant tests check integrity of the sequence after the manipulations
+    if len(final_seq) != trials:
+        raise Warning("number of trials is not" + str(trials) + " but " + str(len(final_seq)))
+
+    if final_seq.count(task0) !=  final_seq.count(task1):
+        #print("ciao")
+        raise Warning("number of " + str(task0) + "(" + str(zeross) + ") is different from number of " + str(task1) + "(" + str(oness) + ")")
+
+    reps=0
+    sws=0
+    for i in range(1, trials):
+        if final_seq[i] == final_seq[i-1]:
+            reps +=1
+        else:
+            sws += 1
+    if abs(n_rep-reps) > 1:
+        raise Warning("number of repetitions is " + str(reps) + " and is different from desired: " + str(n_rep))
+    # if correct number of rep and no warning was raised, return output
+    else:
+        print("success")
+        seq_Completed=1 # sequence is completed
+        #print(seq_Completed)
+        # retun seq and reps and sws
+        seqAndDiff = [final_seq, reps, sws]
+        return seqAndDiff
+
+# output test:
+# test the final sequence of exact_repetition_proportion
+# exact switch proportion
+trials = 32
+percent_rep = 0.66
+n_rep = math.floor(trials*percent_rep)
+task0 = "A"
+task1 = "B"
+
+list(range(32, 140, 2))
+#for i in range(100):
+for percent_rep in [0.5, 0.6, 0.7]:
+    seq = []
+    seq = exact_repetition_proportion(trials, percent_rep, task0, task1)[0]
+
+    n_rep = math.floor(trials*percent_rep)
+
+    rep=0
+    sw=0
+
+    #seq.to_csv(myDir+"balancedMinus1Seq.csv", index=False) # to store it as a .csv in myDir folder
+    for i in range(1, trials):
+        if seq[i] == seq[i-1]:
+            rep +=1
+        else:
+            sw +=1
+    if abs(rep-n_rep) > 1:
+        print("number of repetitions is " + str(rep) + " against " + str(n_rep))
+
+#exact_repetition_proportion(trials, percent_rep, task0, task1)
