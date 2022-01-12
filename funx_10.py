@@ -22,6 +22,7 @@ functions:
     * shuffle_rows
     * DfBooleanOrder
     * balanceNMinus2_str - still developing
+    * exact_repetition_proportion
 """
 
 import random, numpy as np
@@ -543,7 +544,7 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat = 1):
     #return [stimAndTask, taskSeq, counter]
     return stimAndTask
 
-def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
+def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5):
     """Assign stimuli to taks in balanced fashion
 
     as its _str-less version.
@@ -576,6 +577,8 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
     seqCompleted = 0
     counter = 0
     while seqCompleted == 0 and counter <= maxCounter:
+        if percent_rep != 0.5:
+            taskSeq = np.array(exact_repetition_proportion(trials, percent_rep, 0, 1)[0])
         if minusWhat == 1:
             taskSeq = np.array(balanceTransitionsMinus1_str(trials, 0, 1)[0])
         elif minusWhat == 2:
@@ -616,16 +619,18 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
                         break
                 if not found and counter == maxCounter:
                     raise Warning("the numbers cannot be correctly assigned to the 0s and the 1s. There are 1 (or more) pairs of 2 equal numbers in subsequent positions")
-        # test for numbers assignment
+        # increase counter
         counter += 1
-        vec = [[0]*int(trials/2), [0]*int(trials/2)] # preallocate an array: trials/2 is the max lenght allowed for stimElmn list
-        for task in range(2):
-            for i in stim2num: # fill in the array with the times each element is found aside 0 and 1
-                vec[task][i] = sum(np.logical_and(stimAndTask[:,1] == i,stimAndTask[:,0] == task))
-            vec1 = [vec[task][i] for i in stim2num] # take only the relevant positions of vec (some will be 0)
-            equalTimes = all(x== vec1[0] for x in vec1) # are number of time all the same within a task?
-            if (not equalTimes) and counter > maxCounter:
-                raise Warning("the function is wrong: stimuli are not equally represented in task " + str(task))
+        # test for numbers assignment
+        if (len(stimElmns) != trials):
+            vec = [[0]*int(trials/2), [0]*int(trials/2)] # preallocate an array: trials/2 is the max lenght allowed for stimElmn list
+            for task in range(2):
+                for i in stim2num: # fill in the array with the times each element is found aside 0 and 1
+                    vec[task][i] = sum(np.logical_and(stimAndTask[:,1] == i,stimAndTask[:,0] == task))
+                vec1 = [vec[task][i] for i in stim2num] # take only the relevant positions of vec (some will be 0)
+                equalTimes = all(x== vec1[0] for x in vec1) # are number of time all the same within a task?
+                if (not equalTimes) and counter > maxCounter:
+                    raise Warning("the function is wrong: stimuli are not equally represented in task " + str(task))
         # test for effectiveness of the removal of numbers repetitions
         bool_2inARow = [stimAndTask[i, 1] == stimAndTask[i-1, 1] for i in range(1,trials)]
         if (any(bool_2inARow)) and counter > maxCounter:
@@ -634,7 +639,7 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1):
         if not all(taskSeq == stimAndTask[:,0]):
             raise Warning("the final sequence of tasks (0 and 1) is not identical to the starting one. The function should not cause the sequence to change")
         # assign 1 to seqCompleted variable to exit the while loop
-        if (not any(bool_2inARow)) and equalTimes:
+        if not any(bool_2inARow):
             seqCompleted = 1
             # substitute 1 and 0 with the task names
             stimAndTask_df = pd.DataFrame(stimAndTask, columns = ['task', 'stim'])
@@ -869,6 +874,8 @@ def shuffle_rows(res, df2shuf, targetCol):
     for i in range(len(res)):
         # pick the firt match, thanks to the intial shuffle this still gives
         # a ranomd-enough final df
+        #print(i)
+        #print(res[i])
         ch = df2shuf[df2shuf[targetCol]== res[i]].index[0]
         row = df2shuf.iloc[ch] # create a new row as the matching row
         df_output = df_output.append(row, ignore_index = True) # append the new row
@@ -1161,33 +1168,33 @@ def exact_repetition_proportion(trials, percent_rep, task0, task1):
         seqAndDiff = [final_seq, reps, sws]
         return seqAndDiff
 
-# output test:
-# test the final sequence of exact_repetition_proportion
-# exact switch proportion
-trials = 32
-percent_rep = 0.66
-n_rep = math.floor(trials*percent_rep)
-task0 = "A"
-task1 = "B"
-
-list(range(32, 140, 2))
-#for i in range(100):
-for percent_rep in [0.5, 0.6, 0.7]:
-    seq = []
-    seq = exact_repetition_proportion(trials, percent_rep, task0, task1)[0]
-
-    n_rep = math.floor(trials*percent_rep)
-
-    rep=0
-    sw=0
-
-    #seq.to_csv(myDir+"balancedMinus1Seq.csv", index=False) # to store it as a .csv in myDir folder
-    for i in range(1, trials):
-        if seq[i] == seq[i-1]:
-            rep +=1
-        else:
-            sw +=1
-    if abs(rep-n_rep) > 1:
-        print("number of repetitions is " + str(rep) + " against " + str(n_rep))
-
-#exact_repetition_proportion(trials, percent_rep, task0, task1)
+# # output test:
+# # test the final sequence of exact_repetition_proportion
+# # exact switch proportion
+# trials = 32
+# percent_rep = 0.66
+# n_rep = math.floor(trials*percent_rep)
+# task0 = "A"
+# task1 = "B"
+#
+# list(range(32, 140, 2))
+# #for i in range(100):
+# for percent_rep in [0.5, 0.6, 0.7]:
+#     seq = []
+#     seq = exact_repetition_proportion(trials, percent_rep, task0, task1)[0]
+#
+#     n_rep = math.floor(trials*percent_rep)
+#
+#     rep=0
+#     sw=0
+#
+#     #seq.to_csv(myDir+"balancedMinus1Seq.csv", index=False) # to store it as a .csv in myDir folder
+#     for i in range(1, trials):
+#         if seq[i] == seq[i-1]:
+#             rep +=1
+#         else:
+#             sw +=1
+#     if abs(rep-n_rep) > 1:
+#         print("number of repetitions is " + str(rep) + " against " + str(n_rep))
+#
+# #exact_repetition_proportion(trials, percent_rep, task0, task1)
