@@ -544,7 +544,7 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat = 1):
     #return [stimAndTask, taskSeq, counter]
     return stimAndTask
 
-def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5):
+def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = []):
     """Assign stimuli to taks in balanced fashion
 
     as its _str-less version.
@@ -577,14 +577,18 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
     seqCompleted = 0
     counter = 0
     while seqCompleted == 0 and counter <= maxCounter:
-        if percent_rep != 0.5:
-            taskSeq = np.array(exact_repetition_proportion(trials, percent_rep, 0, 1)[0])
-        if minusWhat == 1:
-            taskSeq = np.array(balanceTransitionsMinus1_str(trials, 0, 1)[0])
-        elif minusWhat == 2:
-            taskSeq = balanceTransitionsMinus2(trials)
+        if ready_taskSeq == []: # if there's no taskSeq alreay, create one
+            if percent_rep != 0.5: # if you don't want 50% switches, use this fun
+                taskSeq = np.array(exact_repetition_proportion(trials, percent_rep, 0, 1)[0])
+            if minusWhat == 1:
+                taskSeq = np.array(balanceTransitionsMinus1_str(trials, 0, 1)[0])
+            elif minusWhat == 2:
+                taskSeq = balanceTransitionsMinus2(trials)
+            else:
+                raise ValueError("minusWhat must be either 1, if you want to balance n-1 rep and sw, or 2, if you want to balance n-2 rep and sw")
         else:
-            raise ValueError("minusWhat must be either 1, if you want to balance n-1 rep and sw, or 2, if you want to balance n-2 rep and sw")
+            taskSeq = ready_taskSeq
+            print(taskSeq)
         stimAndTask = np.c_[taskSeq, np.zeros(trials)] # prepare an array trials*2 where the first column is trialSeq
         # transform stimELemns into a list of integers to be able to use np arrays
         stim2num = list(range(len(stimElmns)))
@@ -665,6 +669,7 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
 # minusWhat = 1
 # nSim = 100
 # counterSim = [0]*nSim
+#
 # for sim in range(nSim):
 #     #print i
 #     stimAndTask_TaskSeq = orderStimWithinTasks(trials, stimElmns)
@@ -698,6 +703,15 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
 # # test speed in 100 rounds:
 # print("orderStimWithinTasks in 100 simulations: " + str(timeit.timeit(stmt= "orderStimWithinTasks(96, list(range(1,5)) + list(range(6,10)), 1)", number = 100, setup="from __main__ import orderStimWithinTasks")))
 #
+# # === test for orderStimWithinTasks with ready_taskSeq ====
+# ready_taskSeq1 = balanceTransitionsMinus1(96)[0]
+#
+# task0 = "magnit"
+# task1 = "parity"
+#
+# orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = ready_taskSeq1)
+# orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = [])
+
 # # ------------ Further check for orderStimWithinTasks_str -----------------
 # orderStimWithinTasks_str(40, [1,2,3,4], "task0", "task1")
 # trials = 96
