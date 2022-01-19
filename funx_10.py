@@ -568,7 +568,7 @@ def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1
     str: whether to replace tasks with names or leave digits
     minusWhat: either 1 for balanceTransitionsMinus1 or 2.
     percent_rep: how many switches in %?
-    ready_taskSeq: the task sequence if created outside the function
+    ready_taskSeq: (np.array) the task sequence if created outside the function
 
     Returns
     -------
@@ -600,7 +600,7 @@ def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1
         stim2num = list(range(len(stimElmns)))
         timesXtrial = trials/len(stimElmns)/len(Tasks) # calculate how many times each stim stands with each of the tasks
         stimLst = np.repeat(stim2num,timesXtrial) # replicate the list with unique stimuli this number of times
-        for ttt in range(len(Tasks)): # for task 0 and 1, create a vector of randomized stimuli
+        for ttt in np.unique(taskSeq): # for all the tasks, create a vector of randomized stimuli
             stimSeq = np.random.permutation(stimLst)
             currTask = np.where(taskSeq == ttt)[0]
             currPos = 0
