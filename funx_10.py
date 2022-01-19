@@ -544,14 +544,14 @@ def orderStimWithinTasks(trials, stimElmns, minusWhat = 1):
     #return [stimAndTask, taskSeq, counter]
     return stimAndTask
 
-def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = []):
+def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = []):
     """Assign stimuli to taks in balanced fashion
 
     as its _str-less version.
     Generates a 2-columns array, with column 1 containing the output of a
     transitionBalance function, the second an input-defined set of elements
     s.t.:
-    (a)each elemet is repeated same number of times,
+    (a) each elemet is repeated same number of times,
     (b) elements do not repeat in subsequent rows and
     (c) each element will be equally often in rows where column1 = 0 and
     rows where column1 = 1.
@@ -564,7 +564,11 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
     ----------
     trials: the lenght of the needed sequence (int)
     stimElmns: list with the elements of the second column
+    Tasks: list with tasks names
+    str: whether to replace tasks with names or leave digits
     minusWhat: either 1 for balanceTransitionsMinus1 or 2.
+    percent_rep: how many switches in %?
+    ready_taskSeq: the task sequence if created outside the function
 
     Returns
     -------
@@ -573,7 +577,7 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
     """
     if (trials/2)%len(stimElmns) != 0:
             raise ValueError("stimElmns list length must be a divisor of trials/2, otherwise balancing is not possible by construction. Also, trials must even integer")
-    maxCounter = 10
+    maxCounter = 20
     seqCompleted = 0
     counter = 0
     while seqCompleted == 0 and counter <= maxCounter:
@@ -587,16 +591,18 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
             else:
                 raise ValueError("minusWhat must be either 1, if you want to balance n-1 rep and sw, or 2, if you want to balance n-2 rep and sw")
         else:
+            if len(np.unique(ready_taskSeq)) != len(Tasks):
+                raise ValueError("the list of Tasks names must be = len of unique elements in ready_taskSeq")
             taskSeq = ready_taskSeq
-            print(taskSeq)
+            #print(taskSeq)
         stimAndTask = np.c_[taskSeq, np.zeros(trials)] # prepare an array trials*2 where the first column is trialSeq
         # transform stimELemns into a list of integers to be able to use np arrays
         stim2num = list(range(len(stimElmns)))
-        timesXtrial = trials/len(stimElmns)/2 # calculate how many times each stim stands with each of the 2 tasks
+        timesXtrial = trials/len(stimElmns)/len(Tasks) # calculate how many times each stim stands with each of the tasks
         stimLst = np.repeat(stim2num,timesXtrial) # replicate the list with unique stimuli this number of times
-        for task in range(2): # for task 0 and 1, create a vector of randomized stimuli
+        for ttt in range(len(Tasks)): # for task 0 and 1, create a vector of randomized stimuli
             stimSeq = np.random.permutation(stimLst)
-            currTask = np.where(taskSeq == task)[0]
+            currTask = np.where(taskSeq == ttt)[0]
             currPos = 0
             for g in currTask: # paste one randomize vector aside tasks 0s and the other aside 1s
                 stimAndTask[g, 1] = stimSeq[currPos]
@@ -622,19 +628,20 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
                         stimAndTask[j-1, 1] = found # the position of the first element of the pair of equal numbers gets the value found
                         break
                 if not found and counter == maxCounter:
+                    #print(stimAndTask)
                     raise Warning("the numbers cannot be correctly assigned to the 0s and the 1s. There are 1 (or more) pairs of 2 equal numbers in subsequent positions")
         # increase counter
         counter += 1
-        # test for numbers assignment
-        if (len(stimElmns) != trials):
-            vec = [[0]*int(trials/2), [0]*int(trials/2)] # preallocate an array: trials/2 is the max lenght allowed for stimElmn list
-            for task in range(2):
-                for i in stim2num: # fill in the array with the times each element is found aside 0 and 1
-                    vec[task][i] = sum(np.logical_and(stimAndTask[:,1] == i,stimAndTask[:,0] == task))
-                vec1 = [vec[task][i] for i in stim2num] # take only the relevant positions of vec (some will be 0)
-                equalTimes = all(x== vec1[0] for x in vec1) # are number of time all the same within a task?
-                if (not equalTimes) and counter > maxCounter:
-                    raise Warning("the function is wrong: stimuli are not equally represented in task " + str(task))
+        # # test for numbers assignment
+        # if (len(stimElmns) != trials):
+        #     vec = [[0]*int(trials/2), [0]*int(trials/2)] # preallocate an array: trials/2 is the max lenght allowed for stimElmn list
+        #     for task in range(len(Tasks)):
+        #         for i in stim2num: # fill in the array with the times each element is found aside 0 and 1
+        #             vec[task][i] = sum(np.logical_and(stimAndTask[:,1] == i,stimAndTask[:,0] == task))
+        #         vec1 = [vec[task][i] for i in stim2num] # take only the relevant positions of vec (some will be 0)
+        #         equalTimes = all(x== vec1[0] for x in vec1) # are number of time all the same within a task?
+        #         if (not equalTimes) and counter > maxCounter:
+        #             raise Warning("the function is wrong: stimuli are not equally represented in task " + str(task))
         # test for effectiveness of the removal of numbers repetitions
         bool_2inARow = [stimAndTask[i, 1] == stimAndTask[i-1, 1] for i in range(1,trials)]
         if (any(bool_2inARow)) and counter > maxCounter:
@@ -645,12 +652,13 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
         # assign 1 to seqCompleted variable to exit the while loop
         if not any(bool_2inARow):
             seqCompleted = 1
-            # substitute 1 and 0 with the task names
             stimAndTask_df = pd.DataFrame(stimAndTask, columns = ['task', 'stim'])
-            task0_indx = stimAndTask_df[stimAndTask_df['task'] == 0].index
-            stimAndTask_df.loc[task0_indx, 'task'] = task0
-            task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
-            stimAndTask_df.loc[task1_indx, 'task'] = task1
+            if str: # if string is true change tasks, otheriwse stim only
+                # substitute 1 and 0 with the task names
+                task0_indx = stimAndTask_df[stimAndTask_df['task'] == 0].index
+                stimAndTask_df.loc[task0_indx, 'task'] = task0
+                task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
+                stimAndTask_df.loc[task1_indx, 'task'] = task1
             # substitute numerical stim with stim elements
             # first make the stim col into an int col to get rid of .0
             stimAndTask_df = stimAndTask_df.astype({'stim': 'int'})
@@ -663,10 +671,25 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
     return stimAndTask_df
 
 # #  ------- test for orderStimWithinTasks performance and correctness --------
-# trials = 96
+# trials = 384
 # #stimLst = list(range(1,5)) + list(range(6,10))
-# stimElmns = list(range(3))
+# stimElmns = list(range(24))
 # minusWhat = 1
+#
+# # === test for orderStimWithinTasks with ready_taskSeq ====
+# #ready_taskSeq1 = balanceTransitionsMinus1(384)[0]
+# ready_taskSeq1 = np.repeat(list(range(16)), 24)
+# np.random.shuffle(ready_taskSeq1)
+#
+# Tasks = ["A", "B"]
+# Tasks = [str(i) for i in range(len(np.unique(ready_taskSeq1)))]
+# len(np.unique(ready_taskSeq1)) != len(Tasks)
+#
+# stimAndTask1 = orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = ready_taskSeq1)
+# stimAndTask1.to_csv("trystimAndTask1.csv", sep = ";")
+# stimAndTask = orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = [])
+#
+# # ---------------- Loop over many sim ---------------
 # nSim = 100
 # counterSim = [0]*nSim
 #
@@ -703,15 +726,6 @@ def orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, per
 # # test speed in 100 rounds:
 # print("orderStimWithinTasks in 100 simulations: " + str(timeit.timeit(stmt= "orderStimWithinTasks(96, list(range(1,5)) + list(range(6,10)), 1)", number = 100, setup="from __main__ import orderStimWithinTasks")))
 #
-# # === test for orderStimWithinTasks with ready_taskSeq ====
-# ready_taskSeq1 = balanceTransitionsMinus1(96)[0]
-#
-# task0 = "magnit"
-# task1 = "parity"
-#
-# orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = ready_taskSeq1)
-# orderStimWithinTasks_str(trials, stimElmns, task0, task1, minusWhat = 1, percent_rep = 0.5, ready_taskSeq = [])
-
 # # ------------ Further check for orderStimWithinTasks_str -----------------
 # orderStimWithinTasks_str(40, [1,2,3,4], "task0", "task1")
 # trials = 96
