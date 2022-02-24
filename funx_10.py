@@ -596,7 +596,6 @@ def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1
             taskSeq = ready_taskSeq
             #print(taskSeq)
         stimAndTask = np.c_[taskSeq, np.zeros(trials)] # prepare an array trials*2 where the first column is trialSeq
-        # transform stimELemns into a list of integers to be able to use np arrays
         stim2num = list(range(len(stimElmns)))
         timesXtrial = trials/len(stimElmns)/len(Tasks) # calculate how many times each stim stands with each of the tasks
         stimLst = np.repeat(stim2num,timesXtrial) # replicate the list with unique stimuli this number of times
@@ -656,9 +655,9 @@ def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1
             if str: # if string is true change tasks, otheriwse stim only
                 # substitute 1 and 0 with the task names
                 task0_indx = stimAndTask_df[stimAndTask_df['task'] == 0].index
-                stimAndTask_df.loc[task0_indx, 'task'] = task0
+                stimAndTask_df.loc[task0_indx, 'task'] = Tasks[0]
                 task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
-                stimAndTask_df.loc[task1_indx, 'task'] = task1
+                stimAndTask_df.loc[task1_indx, 'task'] = Tasks[1]
             # substitute numerical stim with stim elements
             # first make the stim col into an int col to get rid of .0
             stimAndTask_df = stimAndTask_df.astype({'stim': 'int'})
