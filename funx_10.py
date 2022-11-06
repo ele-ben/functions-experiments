@@ -575,8 +575,8 @@ def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1
     pd.DataFrame
         2 columns df with trials rows
     """
-    if (trials/2)%len(stimElmns) != 0:
-            raise ValueError("stimElmns list length must be a divisor of trials/2, otherwise balancing is not possible by construction. Also, trials must even integer")
+    if (trials/len(Tasks))%len(stimElmns) != 0:
+        raise ValueError("stimElmns list length must be a divisor of trials/number of tasks, otherwise balancing is not possible by construction. Also, trials must even integer")
     maxCounter = 20
     seqCompleted = 0
     counter = 0
@@ -654,10 +654,9 @@ def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1
             stimAndTask_df = pd.DataFrame(stimAndTask, columns = ['task', 'stim'])
             if str: # if string is true change tasks, otheriwse stim only
                 # substitute 1 and 0 with the task names
-                task0_indx = stimAndTask_df[stimAndTask_df['task'] == 0].index
-                stimAndTask_df.loc[task0_indx, 'task'] = Tasks[0]
-                task1_indx = stimAndTask_df[stimAndTask_df['task'] == 1].index
-                stimAndTask_df.loc[task1_indx, 'task'] = Tasks[1]
+                for ttt in np.unique(taskSeq):
+                    task0_indx = stimAndTask_df[stimAndTask_df['task'] == ttt].index
+                    stimAndTask_df.loc[task0_indx, 'task'] = Tasks[ttt]
             # substitute numerical stim with stim elements
             # first make the stim col into an int col to get rid of .0
             stimAndTask_df = stimAndTask_df.astype({'stim': 'int'})
