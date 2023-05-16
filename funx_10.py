@@ -651,20 +651,25 @@ def orderStimWithinTasks_str(trials, stimElmns, Tasks, str = True, minusWhat = 1
         # assign 1 to seqCompleted variable to exit the while loop
         if not any(bool_2inARow):
             seqCompleted = 1
-            stimAndTask_df = pd.DataFrame(stimAndTask, columns = ['task', 'stim'])
+            stimAndTask_df = pd.DataFrame(stimAndTask, columns = ['task', 'stimN'])
             if str: # if string is true change tasks, otheriwse stim only
                 # substitute 1 and 0 with the task names
                 for ttt in np.unique(taskSeq):
                     task0_indx = stimAndTask_df[stimAndTask_df['task'] == ttt].index
                     stimAndTask_df.loc[task0_indx, 'task'] = Tasks[ttt]
             # substitute numerical stim with stim elements
+            temp2stim = pd.DataFrame(zip(stimLst, stimElmns), columns = ['stimN', 'stim'])
+            stimAndTask_df = stimAndTask_df.merge(temp2stim, how = "left").drop(["stimN"], axis = 1)
             # first make the stim col into an int col to get rid of .0
-            stimAndTask_df = stimAndTask_df.astype({'stim': 'int'})
+            #stimAndTask_df["stim"] = pd.to_numeric(stimAndTask_df["stim"])
+            # stimAndTask_df = stimAndTask_df.astype({'stim': 'int'}) # deprecated in > 0.17
+            
             # then into string, so that it is ready to get string stimuli
-            stimAndTask_df = stimAndTask_df.astype({'stim': 'str'})
-            for jj in range(len(stimAndTask_df)):
+            #stimAndTask_df = stimAndTask_df.astype({'stim': 'str'}) # deprecated in > 0.17
+            #stimAndTask_df["stim"].apply(lambda row: stimElmns[int(row["stim"])])
+            #for jj in range(len(stimAndTask_df)):
                 #stimAndTask_df["stim"].loc[jj] = stimElmns[int(stimAndTask_df["stim"].loc[jj])]
-                stimAndTask_df.at[jj, "stim"] = stimElmns[int(stimAndTask_df["stim"].loc[jj])]
+                #stimAndTask_df.at[jj, "stim"] = stimElmns[int(stimAndTask_df["stim"].loc[jj])]
     #return [stimAndTask_df, taskSeq, counter]
     return stimAndTask_df
 
